@@ -1,18 +1,14 @@
-#
-# pgnbot.py v2022-01-02
-#
-# TODO create channel for each game
-
+# pgnbot.py 
+import io
+import os
+import json
+import logging
 
 import discord
-import logging
 import chess
 import chess.pgn
 import chess.svg
 import requests
-import io
-import os
-import json
 from cairosvg import svg2png
 
 logging.basicConfig(level=logging.INFO)
@@ -23,18 +19,10 @@ intents.reactions = True
 intents.members = True
 intents.guilds = True
 
-
-
 with open("config.json", "r") as f:
     config = json.load(f)
-print(config)
-active_messages = {}
 
-# send_image(message.channel, "1.png", game.headers, message.author.mention)
-async def send_image(channel, filename, desc = " ", content = ""):
-    images_channel = client.get_channel(config["DISCORD_IMG_CHANNEL"])
-    img_msg = await images_channel.send("", file=discord.File(open(filename, 'rb')))
-    return await channel.send(content, embed=discord.Embed(type='image',description=desc).set_image(url = str(img_msg.attachments[0])))
+active_messages = {}
 
 class ActiveMessage:
     def __init__(self, game, message):
@@ -64,7 +52,7 @@ class ActiveMessage:
 
     async def render(self):
         if not config["PRECACHE_MOVES"]:
-            if not self.n in self.icache:
+            if self.n not in self.icache:
                 svg = chess.svg.board(self.board)
                 filename = self.path + str(self.n) + ".png"
                 svg2png(bytestring = svg, write_to=filename)
